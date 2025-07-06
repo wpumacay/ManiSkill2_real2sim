@@ -9,6 +9,11 @@ from mani_skill2_real2sim.utils.registration import register_env
 
 from .base_env import CustomSceneEnv, CustomOtherObjectsInSceneEnv
 
+CUBE_SIZE = 0.025
+
+XY_MIN = (-0.35, -0.02)
+XY_MAX = (-0.12, 0.42)
+
 
 class PlayWithCubesInSceneEnv(CustomSceneEnv):
     obj: sapien.Actor  # target object to grasp
@@ -18,6 +23,8 @@ class PlayWithCubesInSceneEnv(CustomSceneEnv):
         prepackaged_config: bool = False,
         **kwargs,
     ):
+        self.cubes: List[sapien.Actor] = []
+
         self.prepackaged_config = prepackaged_config
         if self.prepackaged_config:
             # use prepackaged evaluation configs (visual matching)
@@ -65,6 +72,40 @@ class PlayWithCubesInSceneEnv(CustomSceneEnv):
 
     def _load_actors(self):
         self._load_arena_helper()
+        self._load_model()
+
+    def _load_model(self) -> None:
+        cube1 = self._build_cube_helper(
+            pos=np.array([-0.1, -0.05, self.scene_table_height + 0.05]),
+            color=np.array([1.0, 0.0, 0.0]),
+        )
+        cube2 = self._build_cube_helper(
+            pos=np.array([-0.1, 0.05, self.scene_table_height + 0.05]),
+            color=np.array([0.0, 1.0, 0.0]),
+        )
+        cube3 = self._build_cube_helper(
+            pos=np.array([-0.1, 0.15, self.scene_table_height + 0.05]),
+            color=np.array([0.0, 0.0, 1.0]),
+        )
+
+        self.cubes.append(cube1)
+        self.cubes.append(cube2)
+        self.cubes.append(cube3)
+
+    def _build_cube_helper(self, pos: np.ndarray, color: np.ndarray) -> sapien.Actor:
+        assert self._scene is not None
+        builder = self._scene.create_actor_builder()
+        builder.add_box_collision(
+            half_size=np.array([CUBE_SIZE, CUBE_SIZE, CUBE_SIZE]),
+        )
+        builder.add_box_visual(
+            half_size=np.array([CUBE_SIZE, CUBE_SIZE, CUBE_SIZE]),
+            color=color,
+        )
+
+        cube = builder.build()
+        cube.set_pose(sapien.Pose(p=pos))
+        return cube
 
     def reset(self, seed=None, options=None):
         if options is None:
@@ -72,6 +113,11 @@ class PlayWithCubesInSceneEnv(CustomSceneEnv):
         options = options.copy()
 
         self.set_episode_rng(seed)
+
+        for cube in self.cubes:
+            x = np.random.uniform(low=XY_MIN[0], high=XY_MAX[0])
+            y = np.random.uniform(low=XY_MIN[1], high=XY_MAX[1])
+            cube.set_pose(sapien.Pose(p=np.array([x, y, self.scene_table_height + 0.05])))
 
         reconfigure = options.get("reconfigure", False)
         if self.prepackaged_config:
