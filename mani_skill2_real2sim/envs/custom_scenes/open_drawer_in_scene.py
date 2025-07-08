@@ -304,3 +304,47 @@ class CloseMiddleDrawerCustomInSceneEnv(CloseDrawerCustomInSceneEnv):
 @register_env("CloseBottomDrawerCustomInScene-v0", max_episode_steps=113)
 class CloseBottomDrawerCustomInSceneEnv(CloseDrawerCustomInSceneEnv):
     drawer_ids = ["bottom"]
+
+
+@register_env("OpenDrawerAndPickFruitInScene-v0", max_episode_steps=113)
+class OpenDrawerAndPickFruitInSceneEnv(OpenDrawerCustomInSceneEnv):
+    drawer_ids = ["top"]
+
+    def __init__(self, **kwargs):
+        self._plate: Optional[sapien.Actor] = None
+        self._object: Optional[sapien.Actor] = None
+
+        super().__init__(**kwargs)
+
+    def _load_actors(self):
+        super()._load_actors()
+
+        assert self._scene is not None
+
+        self._plate = self._build_actor_helper(
+            "bridge_plate_objaverse",
+            self._scene,
+            scale=2.0,
+            root_dir=self.asset_root.as_posix(),
+        )
+        self._plate.set_pose(
+            sapien.Pose(p=np.array([-0.235, 0.2, self.scene_table_height + 0.05]))
+        )
+
+        self._object = self._build_actor_helper(
+            "eggplant",
+            self._scene,
+            scale=2.0,
+            root_dir=self.asset_root.as_posix(),
+        )
+
+    def _load_articulations(self):
+        super()._load_articulations()
+
+        if self._object:
+            self._object.set_pose(
+                sapien.Pose(p=np.array([-0.155, 0., 0.75 + 0.025]))
+            )
+
+
+
