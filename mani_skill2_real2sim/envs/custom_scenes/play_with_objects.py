@@ -16,14 +16,17 @@ OBJECTS_INFO = {
     'plate': {
         'scale': 1.0,
         'asset_id': 'bridge_plate_objaverse',
+        'init_xy': [-0.235, 0.2],
     },
     'spoon': {
         'scale': 1.0,
         'asset_id': 'bridge_spoon_generated_modified',
+        'init_xy': [-0.125, 0.0],
     },
     'apple': {
         'scale': 1.0,
         'asset_id': 'apple',
+        'init_xy': [-0.325, 0.4],
     }
 }
 
@@ -96,12 +99,6 @@ class PlayWithObjectsInSceneEnv(CustomSceneEnv):
 
         self.set_episode_rng(seed)
 
-        for object_id in self.objects:
-            x = np.random.uniform(low=XY_MIN[0], high=XY_MAX[0])
-            y = np.random.uniform(low=XY_MIN[1], high=XY_MAX[1])
-            z = self.scene_table_height + 0.1
-            self.objects[object_id].set_pose(sapien.Pose(p=np.array([x, y, z])))
-
         reconfigure = options.get("reconfigure", False)
         if self.prepackaged_config:
             _reconfigure = self._additional_prepackaged_config_reset(options)
@@ -133,20 +130,15 @@ class PlayWithObjectsCustomInSceneEnv(PlayWithObjectsInSceneEnv, CustomOtherObje
     
     def _load_models(self) -> None:
         assert self._scene is not None
-        
         for obj_id in OBJECTS_INFO:
-            x = np.random.uniform(low=XY_MIN[0], high=XY_MAX[0])
-            y = np.random.uniform(low=XY_MIN[1], high=XY_MAX[1])
-            z = self.scene_table_height + 0.05
-            self.objects[obj_id] = self._build_object_helper(
-                pos=np.array([x, y, z]),
-                object_id=obj_id,
-            )
+            self.objects[obj_id] = self._build_object_helper(object_id=obj_id)
 
-    def _build_object_helper(self, pos: np.ndarray, object_id: str) -> sapien.Actor:
+    def _build_object_helper(self, object_id: str) -> sapien.Actor:
         assert self._scene is not None
         object_scale = OBJECTS_INFO[object_id]['scale']
         object_asset = OBJECTS_INFO[object_id]['asset_id']
+        object_init_xy = OBJECTS_INFO[object_id]['init_xy']
+        z = self.scene_table_height + 0.05
 
         obj = self._build_actor_helper(
             object_asset,
@@ -154,5 +146,5 @@ class PlayWithObjectsCustomInSceneEnv(PlayWithObjectsInSceneEnv, CustomOtherObje
             scale=object_scale,
             root_dir=self.asset_root.as_posix(),
         )
-        obj.set_pose(sapien.Pose(p=pos))
+        obj.set_pose(sapien.Pose(p=np.array([object_init_xy[0], object_init_xy[1], z])))
         return obj
