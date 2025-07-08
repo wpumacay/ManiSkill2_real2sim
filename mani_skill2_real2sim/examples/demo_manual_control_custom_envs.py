@@ -245,7 +245,7 @@ def main():
     obs, info = env.reset(options=env_reset_options)
     print("Reset info:", info)
     print("Instruction:", env.get_language_instruction())
-    after_reset = True
+    after_reset = False
 
     if "google_robot" in env.agent.robot.name:
         print(

@@ -4,3 +4,4 @@ from . import open_drawer_in_scene
 from . import put_on_in_scene
 from . import place_in_closed_drawer_in_scene
 from . import play_with_cubes
+from . import play_with_fruits
