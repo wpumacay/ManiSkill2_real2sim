@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 import numpy as np
 import sapien.core as sapien
@@ -7,31 +7,16 @@ import sapien.core as sapien
 from mani_skill2_real2sim import ASSET_DIR
 from mani_skill2_real2sim.utils.registration import register_env
 
-from .base_env import CustomSceneEnv, CustomOtherObjectsInSceneEnv
+from .base_env import CustomOtherObjectsInSceneEnv
+
+from scipy.spatial.transform import Rotation as R
 
 XY_MIN = (-0.35, -0.02)
 XY_MAX = (-0.12, 0.42)
 
-OBJECTS_INFO = {
-    'plate': {
-        'scale': 1.0,
-        'asset_id': 'bridge_plate_objaverse',
-        'init_xy': [-0.235, 0.2],
-    },
-    'spoon': {
-        'scale': 1.0,
-        'asset_id': 'bridge_spoon_generated_modified',
-        'init_xy': [-0.125, 0.0],
-    },
-    'apple': {
-        'scale': 1.0,
-        'asset_id': 'apple',
-        'init_xy': [-0.325, 0.4],
-    }
-}
 
-
-class PlayWithObjectsInSceneEnv(CustomSceneEnv):
+class PlayWithObjectsInSceneEnv(CustomOtherObjectsInSceneEnv):
+    objects_info: Dict[str, Any]
 
     def __init__(
         self,
@@ -90,7 +75,32 @@ class PlayWithObjectsInSceneEnv(CustomSceneEnv):
         self._load_models()
 
     def _load_models(self) -> None:
-        raise NotImplementedError
+        assert self._scene is not None
+        for obj_id in self.objects_info:
+            self.objects[obj_id] = self._build_object_helper(object_id=obj_id)
+
+    def _build_object_helper(self, object_id: str) -> sapien.Actor:
+        assert self._scene is not None
+        object_scale = self.objects_info[object_id]['scale']
+        object_asset = self.objects_info[object_id]['asset_id']
+        object_init_xy = self.objects_info[object_id]['init_xy']
+        object_init_rot = self.objects_info[object_id].get('init_rot', [0.0, 0.0, 0.0])
+        object_height_offset = self.objects_info[object_id].get('height_offset', 0.05)
+        z = self.scene_table_height + object_height_offset
+
+        obj = self._build_actor_helper(
+            object_asset,
+            self._scene,
+            scale=object_scale,
+            root_dir=self.asset_root.as_posix(),
+        )
+        obj.set_pose(
+            sapien.Pose(
+                p=np.array([object_init_xy[0], object_init_xy[1], z]),
+                q=R.from_euler('xyz', object_init_rot, degrees=True).as_quat(scalar_first=False)
+            )
+        )
+        return obj
 
     def reset(self, seed=None, options=None):
         if options is None:
@@ -124,27 +134,66 @@ class PlayWithObjectsInSceneEnv(CustomSceneEnv):
 # Custom Assets
 # ---------------------------------------------------------------------------- #
 
-
 @register_env("PlayWithObjectsCustomInScene-v0", max_episode_steps=80)
-class PlayWithObjectsCustomInSceneEnv(PlayWithObjectsInSceneEnv, CustomOtherObjectsInSceneEnv):
-    
-    def _load_models(self) -> None:
-        assert self._scene is not None
-        for obj_id in OBJECTS_INFO:
-            self.objects[obj_id] = self._build_object_helper(object_id=obj_id)
+class PlayWithObjectsCustomInSceneV0Env(PlayWithObjectsInSceneEnv):
+    objects_info = {
+        'plate': {
+            'scale': 1.0,
+            'asset_id': 'bridge_plate_objaverse',
+            'init_xy': [-0.235, 0.2],
+        },
+        'spoon': {
+            'scale': 1.0,
+            'asset_id': 'bridge_spoon_generated_modified',
+            'init_xy': [-0.125, 0.0],
+        },
+        'apple': {
+            'scale': 1.0,
+            'asset_id': 'apple',
+            'init_xy': [-0.325, 0.4],
+        }
+    }
 
-    def _build_object_helper(self, object_id: str) -> sapien.Actor:
-        assert self._scene is not None
-        object_scale = OBJECTS_INFO[object_id]['scale']
-        object_asset = OBJECTS_INFO[object_id]['asset_id']
-        object_init_xy = OBJECTS_INFO[object_id]['init_xy']
-        z = self.scene_table_height + 0.05
+@register_env("PlayWithObjectsCustomInScene-v1", max_episode_steps=80)
+class PlayWithObjectsCustomInSceneV1Env(PlayWithObjectsInSceneEnv):
+    objects_info = {
+        'plate': {
+            'scale': 1.5,
+            'asset_id': 'bridge_plate_objaverse',
+            'init_xy': [-0.235, 0.2],
+        },
+        'bowl': {
+            'scale': 100.0,
+            'asset_id': 'eli_bowl',
+            'init_xy': [-0.125, 0.0],
+            'init_rot': [0.0, 0.0, 90.0],
+            'height_offset': 0.05,
+        },
+        'redbull': {
+            'scale': 1.0,
+            'asset_id': 'redbull_can',
+            'init_xy': [-0.325, 0.4],
+            'init_rot': [0.0, 180.0, 90.0],
+            'height_offset': 0.15,
+        }
+    }
 
-        obj = self._build_actor_helper(
-            object_asset,
-            self._scene,
-            scale=object_scale,
-            root_dir=self.asset_root.as_posix(),
-        )
-        obj.set_pose(sapien.Pose(p=np.array([object_init_xy[0], object_init_xy[1], z])))
-        return obj
+
+@register_env("PlayWithObjectsCustomInScene-v2", max_episode_steps=80)
+class PlayWithObjectsCustomInSceneV2Env(PlayWithObjectsInSceneEnv):
+    objects_info = {
+        'mug': {
+            'scale': 100.0,
+            'asset_id': 'eli_mug',
+            'init_xy': [-0.235, 0.2],
+            'init_rot': [0.0, 0.0, 90.0],
+        },
+        'marker': {
+            'scale': 100.0,
+            'asset_id': 'eli_marker',
+            'init_xy': [-0.325, 0.4],
+            'height_offset': 0.15,
+        }
+    }
+
+

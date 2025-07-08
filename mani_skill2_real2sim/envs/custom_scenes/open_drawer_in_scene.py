@@ -346,5 +346,5 @@ class OpenDrawerAndPickFruitInSceneEnv(OpenDrawerCustomInSceneEnv):
                 sapien.Pose(p=np.array([-0.155, 0., 0.75 + 0.025]))
             )
 
-
+# mug, marker
 
