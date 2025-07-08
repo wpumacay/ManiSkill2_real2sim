@@ -76,15 +76,15 @@ class PlayWithCubesInSceneEnv(CustomSceneEnv):
 
     def _load_model(self) -> None:
         cube1 = self._build_cube_helper(
-            pos=np.array([-0.1, -0.05, self.scene_table_height + 0.05]),
+            pos=np.array([-0.235, 0.2, self.scene_table_height + 0.05]),
             color=np.array([1.0, 0.0, 0.0]),
         )
         cube2 = self._build_cube_helper(
-            pos=np.array([-0.1, 0.05, self.scene_table_height + 0.05]),
+            pos=np.array([-0.125, 0.0, self.scene_table_height + 0.05]),
             color=np.array([0.0, 1.0, 0.0]),
         )
         cube3 = self._build_cube_helper(
-            pos=np.array([-0.1, 0.15, self.scene_table_height + 0.05]),
+            pos=np.array([-0.325, 0.4, self.scene_table_height + 0.05]),
             color=np.array([0.0, 0.0, 1.0]),
         )
 
@@ -113,11 +113,6 @@ class PlayWithCubesInSceneEnv(CustomSceneEnv):
         options = options.copy()
 
         self.set_episode_rng(seed)
-
-        for cube in self.cubes:
-            x = np.random.uniform(low=XY_MIN[0], high=XY_MAX[0])
-            y = np.random.uniform(low=XY_MIN[1], high=XY_MAX[1])
-            cube.set_pose(sapien.Pose(p=np.array([x, y, self.scene_table_height + 0.05])))
 
         reconfigure = options.get("reconfigure", False)
         if self.prepackaged_config:

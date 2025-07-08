@@ -97,16 +97,6 @@ class PlayWithFruitsInSceneEnv(CustomSceneEnv):
 
         self.set_episode_rng(seed)
 
-        if self.plate:
-            x = np.random.uniform(low=XY_MIN[0], high=XY_MAX[0])
-            y = np.random.uniform(low=XY_MIN[1], high=XY_MAX[1])
-            self.plate.set_pose(sapien.Pose(p=np.array([x, y, self.scene_table_height + 0.05])))
-
-        for fruit_name in self.fruits:
-            x = np.random.uniform(low=XY_MIN[0], high=XY_MAX[0])
-            y = np.random.uniform(low=XY_MIN[1], high=XY_MAX[1])
-            self.fruits[fruit_name].set_pose(sapien.Pose(p=np.array([x, y, self.scene_table_height + 0.1])))
-
         reconfigure = options.get("reconfigure", False)
         if self.prepackaged_config:
             _reconfigure = self._additional_prepackaged_config_reset(options)
@@ -144,18 +134,19 @@ class PlayWithFruitsCustomInSceneEnv(PlayWithFruitsInSceneEnv, CustomOtherObject
             scale=PLATE_SCALE,
             root_dir=self.asset_root.as_posix(),
         )
+        self.plate.set_pose(sapien.Pose(p=np.array([-0.235, 0.2, self.scene_table_height + 0.05])))
 
 
         self.fruits['apple'] = self._build_fruit_helper(
-            pos=np.array([-0.1, -0.05, self.scene_table_height + 0.05]),
+            pos=np.array([-0.125, 0.4, self.scene_table_height + 0.05]),
             fruit_id='apple'
         )
         self.fruits['orange'] = self._build_fruit_helper(
-            pos=np.array([-0.1, 0.05, self.scene_table_height + 0.05]),
+            pos=np.array([-0.125, 0.0, self.scene_table_height + 0.05]),
             fruit_id='orange'
         )
         self.fruits['eggplant'] = self._build_fruit_helper(
-            pos=np.array([-0.1, 0.15, self.scene_table_height + 0.05]),
+            pos=np.array([-0.325, 0.4, self.scene_table_height + 0.05]),
             fruit_id='eggplant'
         )
 
