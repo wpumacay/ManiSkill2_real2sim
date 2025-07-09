@@ -1,6 +1,6 @@
 # This file uses centimeters as units for non-parametric coordinates.
 
-mtllib mug.mtl
+mtllib textured.mtl
 g default
 v 0.000000 0.067606 -0.072370
 v -0.005832 0.068016 -0.071576

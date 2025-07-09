@@ -163,7 +163,7 @@ class PlayWithObjectsCustomInSceneV1Env(PlayWithObjectsInSceneEnv):
             'init_xy': [-0.235, 0.2],
         },
         'bowl': {
-            'scale': 100.0,
+            'scale': 1.0,
             'asset_id': 'eli_bowl',
             'init_xy': [-0.125, 0.0],
             'init_rot': [0.0, 0.0, 90.0],
@@ -183,13 +183,13 @@ class PlayWithObjectsCustomInSceneV1Env(PlayWithObjectsInSceneEnv):
 class PlayWithObjectsCustomInSceneV2Env(PlayWithObjectsInSceneEnv):
     objects_info = {
         'mug': {
-            'scale': 100.0,
+            'scale': 1.0,
             'asset_id': 'eli_mug',
             'init_xy': [-0.235, 0.2],
             'init_rot': [0.0, 0.0, 90.0],
         },
         'marker': {
-            'scale': 100.0,
+            'scale': 1.0,
             'asset_id': 'eli_marker',
             'init_xy': [-0.325, 0.4],
             'height_offset': 0.15,
